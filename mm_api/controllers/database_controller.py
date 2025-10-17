@@ -51,6 +51,17 @@ class DatabaseController:
         group_dict = group_ref.get().to_dict()
 
         return group_dict, group_ref
+    
+    def get_groups(self):
+        groups_ref = self.db.collection('groups')
+        groups_docs = groups_ref.get()
+
+        groups_dict = [
+            {**doc.to_dict(), 'id': doc.id} 
+            for doc in groups_docs
+        ]
+
+        return groups_dict, groups_ref
 
     def store_movies_in_json(self):
         movies_ref = self.db.collection('movies')

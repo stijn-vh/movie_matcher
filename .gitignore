@@ -1,1 +1,12 @@
-mm_frontend/node_modules
+node_modules/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Database
+movies.db
+
+# VSCode
+.vscode/

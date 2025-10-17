@@ -2,65 +2,87 @@ import PropTypes from "prop-types";
 import React, { useState, useEffect, useRef } from 'react';
 import "./style.css";
 
-import PickCard from "../../components/swipe-deck/pick-card/pick-card";
 import AuthForm from "../../components/auth-form";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { GroupList } from "../../components/group-list/group-list";
 
 interface Props {
 } // Empty
 
-interface Movie {
-    ID: string;
-    Name: string;
-    Poster: string;
-    [key: string]: any; // Allow other properties
+interface Group { // Should move to interface file
+    id: string;
+    name: string;
 }
 
+
 export const Main = ({}: Props): JSX.Element => {
-    const [movies, setMovies] = useState<Movie[]>([]);
     const [user, setUser] = useState<any>();
+    const [screenState, setScreenState] = useState<string>();
+    const [groups, setGroups] = useState<Group[]>([])
+    const [group, setCurrentGroup] = useState<Group>();
     const auth = getAuth();
 
     onAuthStateChanged(auth, (changedUser) => {
-        // TODO Why does this get called so many times?
         if (changedUser) {
             setUser(changedUser)
         } else {
             setUser(NaN)
+            setScreenState('auth')
         }
     });
 
     useEffect(() => {
         if (user && user.uid) {
-            fetchMovies(user.uid);
+            if (user.active_group != '') {
+                // Fetch group
+            }
+            else {
+                fetchGroups();
+            }
+            fetchGroups()
         }
     }, [user?.uid]);
 
-    useEffect(() => {
-        console.log("Main screen mounted");
-    }, []);
+    useEffect(() => {}, []);
 
-    const fetchMovies = async (uid: string) => {
-        fetch(`http://localhost:5000/users/` + encodeURIComponent(uid) + `/movies`)
+    const fetchGroups = async () => {
+        fetch(`http://localhost:5000/group/all`)
             .then((response) => response.json())
             .then((data) => {
-                data = data.movies
-                setMovies(data)
+                data = data.groups
+                setGroups(data)
             });
+        
+        setScreenState('groups')
+    };
+
+    const fetchGroupMovies = async () => {
+        fetch(`http://localhost:5000/group/${group?.id}/movies/${user.uid}`)
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data)
+        });
     };
     
-    return (
-        <div className="flex justify-center items-center min-h-screen"> 
-            {user
-                ? <PickCard
-                    uid={user.uid}
-                    cardList={movies}
-                    onEvaluate={(card) => {
-                        setMovies((prev) => prev.filter((c) => c.Name !== card.Name));            
-                    }}
-                />
-                : <AuthForm /> 
-            }
-        </div>
+    const onGroupJoined = (group: Group) => {
+        setScreenState('group_movies')
+        setCurrentGroup(group)
+    };
+
+    const renderScreen = () => {
+        switch(screenState) {
+            case 'auth':
+                return <AuthForm />
+            case 'groups':
+                return <GroupList uid={user.uid} onGroupJoined={onGroupJoined} />
+            case 'group_movies':
+                fetchGroupMovies()
+                return <p>Joined group {group?.name}!</p>
+        }
+    }
+return (
+    <div className="flex justify-center items-center min-h-screen"> 
+        { renderScreen() }
+    </div>
     );
 };

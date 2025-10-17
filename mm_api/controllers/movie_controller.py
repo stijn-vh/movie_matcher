@@ -35,10 +35,7 @@ class MovieController:
 
         return {'movies': df.to_dict(orient='records')}, 200
 
-    def rate_movie(self, uid):
-        if request.method == 'OPTIONS':
-            return '', 200
-        
+    def rate_movie(self, uid):      
         data = request.get_json()
         movie_id = data.get('movie')
         opinion = data.get('opinion')

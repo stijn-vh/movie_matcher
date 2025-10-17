@@ -3,8 +3,12 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity, linear_kernel
+from controllers.utils import Utils
 
 class UserRecommendationController():
+    def __init__(self):
+        self.utils = Utils()
+        
     def determine_cosine_sim_all_movies(self, liked_movies, movies):
         indices = pd.Series(movies.index, index=movies['ID']).drop_duplicates()
 
