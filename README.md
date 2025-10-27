@@ -7,7 +7,7 @@ This project is a web application designed to help users discover movies. It con
 The project is organized into the following main directories:
 
 -   **`mm_api/`:** This directory holds the backend of the application, which is a Flask-based API. It manages data, user authentication, and movie recommendations. Key subdirectories and files include:
-    -   `controllers/`: Contains the logic for handling API requests.
+    -   `controllers/`: Contains the backend logic such as CRUD-endpoints and the recommendation algorithm.
     -   `routes.py`: Defines the API endpoints.
     -   `movies.db`: The SQLite database for storing movie information.
 
@@ -16,6 +16,8 @@ The project is organized into the following main directories:
     -   `screens/`: Top-level screen components such as a swipable list of movie cards.
 
 -   **`scripts/`:** This directory includes various Python scripts for populating and maintaining the movie database. These scripts are used for tasks such as extracting movie ratings and filling the database with movie data.
+
+✨ Interesting files: `mm_api/controllers/group_recommendation_controller.py` and `mm_api/controllers/user_recommendation_controller.py` for the different recommendation algorithms ✨
 
 ## Recommendation Algorithms
  1. `User Recommendations`: This is a content-based system. It recommends movies to a user by finding movies that are similar to ones they've
