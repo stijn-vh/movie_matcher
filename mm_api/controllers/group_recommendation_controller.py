@@ -21,7 +21,7 @@ class GroupRecommendationController():
     # Remove from stack if all users interacted with movie
     def refresh_stack(self, group_object):
         user_count = len(group_object['users'])
-
+        
         ids_to_rem = []
         for id, movie in group_object['stack'].items():
             ratings = [rating for key, rating in movie.items() if key != 'weight']
@@ -81,6 +81,10 @@ class GroupRecommendationController():
         group_object, group_ref = self.dbc.get_group(gid)
 
         personal_stack = {}
+
+        if 'stack' not in group_object:
+            return []
+
         for id, movie in group_object['stack'].items():
             if uid not in movie.keys():
                 personal_stack[id] = movie

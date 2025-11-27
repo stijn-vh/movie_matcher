@@ -6,7 +6,7 @@ from controllers.group_recommendation_controller import GroupRecommendationContr
 
 class GroupController:
     def __init__(self, database_controller):
-        self.group = Blueprint('group', __name__, url_prefix='/group')
+        self.group = Blueprint('groups', __name__, url_prefix='/groups')
         self.dc = database_controller
 
         self.grc = GroupRecommendationController(database_controller, self)
@@ -14,8 +14,8 @@ class GroupController:
     def create_group(self, uid):
         group_dict = {
             'users': [uid],
-            'stack': [],
-            'history': []
+            'stack': {},
+            'history': {}
         }
 
         self.dc.create_group(group_dict)
@@ -24,13 +24,11 @@ class GroupController:
     
     def get_groups(self):
         groups_dict, groups_ref = self.dc.get_groups()
-
         return { 'groups': groups_dict }
     
     def get_group_movies(self, gid, uid):
         personal_movies = self.grc.get_movies_from_stack(gid, uid)
 
-        print('pppp', personal_movies)
         if not personal_movies.empty:
             movies = personal_movies
         else:

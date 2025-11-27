@@ -22,7 +22,7 @@ export const GroupList = ({ uid, onGroupJoined }: Props): JSX.Element => {
     useEffect(() => {}, []);
 
     const fetchGroups = async () => {
-        fetch(`http://localhost:5000/group/all`)
+        fetch(`http://localhost:5000/groups/all`)
             .then((response) => response.json())
             .then((data) => {
                 data = data.groups
@@ -30,7 +30,7 @@ export const GroupList = ({ uid, onGroupJoined }: Props): JSX.Element => {
             });
     };
     const handleJoinGroup = async (group: Group) => {
-        const response = await fetch('http://localhost:5000/group/' + group.id + '/join', {
+        const response = await fetch('http://localhost:5000/groups/' + group.id + '/join', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ uid: uid }),

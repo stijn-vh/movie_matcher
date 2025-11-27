@@ -4,10 +4,11 @@ import "./style.css";
 
 import PickCard from "../../components/swipe-deck/pick-card/pick-card";
 import AuthForm from "../../components/auth-form";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 interface Props {
-} // Empty
+    user: any; // Create user object
+}
 
 interface Movie {
     ID: string;
@@ -16,44 +17,38 @@ interface Movie {
     [key: string]: any; 
 }
 
-export const Main = ({}: Props): JSX.Element => {
+export const CardList = ({ user }: Props): JSX.Element => {
     const [movies, setMovies] = useState<Movie[]>([]);
-    const [user, setUser] = useState<any>();
-    const auth = getAuth();
-
-    onAuthStateChanged(auth, (changedUser) => {
-        // TODO Why does this get called so many times?
-        if (changedUser) {
-            setUser(changedUser)
-        } else {
-            setUser(NaN)
-        }
-    });
 
     useEffect(() => {
-        if (user && user.uid) {
-            fetchMovies(user.uid);
+        if (user && user.uid && user.active_group) {
+            fetchMovies(user);
         }
-    }, [user?.uid]);
+    }, [user?.uid, user?.active_group]);
 
-    useEffect(() => {
-        console.log("Main screen mounted");
-    }, []);
+    const fetchMovies = async (user: any) => {
+        const currentUser = getAuth().currentUser;
+        if (!currentUser) {
+            return;
+        }
+        const token = await currentUser.getIdToken();
 
-    const fetchMovies = async (uid: string) => {
-        fetch(`http://localhost:5000/users/` + encodeURIComponent(uid) + `/movies`)
-            .then((response) => response.json())
-            .then((data) => {
-                data = data.movies
-                setMovies(data)
-            });
+        fetch(`http://localhost:5000/groups/` + encodeURIComponent(user.active_group) + `/movies/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            setMovies(data.movies)
+        });
     };
     
     return (
         <div className="flex justify-center items-center min-h-screen"> 
             {user
                 ? <PickCard
-                    uid={user.uid}
+                    user={user}
                     cardList={movies}
                     onEvaluate={(card) => {
                         setMovies((prev) => prev.filter((c) => c.Name !== card.Name));            

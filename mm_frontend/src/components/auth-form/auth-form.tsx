@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getToken } from "firebase/messaging";
+import { doc, setDoc } from "firebase/firestore";
+import { db, messaging } from "../../utils/firebase"
 
 function AuthForm() {
     const auth = getAuth();
@@ -12,7 +15,7 @@ function AuthForm() {
 
     function signup(mail: string, password: string) {
         createUserWithEmailAndPassword(auth, mail, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 const user = userCredential.user;
             })
             .catch((error) => {
@@ -24,6 +27,7 @@ function AuthForm() {
         signInWithEmailAndPassword(auth, mail, password)
             .then((userCredential) => {
                 const user = userCredential.user;
+                console.log('login', user)
             })
             .catch((error) => {
                 setError(error.message)

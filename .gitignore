@@ -10,3 +10,5 @@ movies.db
 
 # VSCode
 .vscode/
+/mm_api/env
+mm_api/env/firebase.json

@@ -35,7 +35,7 @@ class MovieController:
 
         return {'movies': df.to_dict(orient='records')}, 200
 
-    def rate_movie(self, uid):      
+    def rate_movie(self, gid, uid):      
         data = request.get_json()
         movie_id = data.get('movie')
         opinion = data.get('opinion')
@@ -43,17 +43,13 @@ class MovieController:
         if not uid or not movie_id or opinion is None:
             return {'error': 'Missing attribute'}, 400
         
-        user_data, user_ref = self.dbc.get_user_profile(uid)
-
-        if not user_data:
-            return {'error': 'User not found'}, 404
+        group_data, group_ref = self.dbc.get_group(gid)
         
-        user_movies = user_data.get('movies', {})
-        user_movies[str(movie_id)] = {
-            'timestamp': datetime.now().isoformat(),
-            'opinion': opinion
-        }
-
-        user_ref.update({'movies': user_movies})
+        if not group_data:
+            return {'error': 'Group not found'}, 404
+        
+        stack = group_data.get('stack', {})
+        stack[movie_id][uid] = { 'weight': opinion }
+        group_ref.update({'stack': stack })
 
         return {'message': 'Movie rated successfully'}, 200

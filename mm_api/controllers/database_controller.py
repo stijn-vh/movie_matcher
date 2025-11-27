@@ -36,11 +36,24 @@ class DatabaseController:
         user_ref = self.db.collection('users').document(str(user_id))
         user_dict = user_ref.get().to_dict()
 
-        if not user_dict:
-            user_dict = {'Name': 'test', 'movies': {}}
-            user_ref.set(user_dict)
+        if user_dict is None:
+            return None, None
+        
+        user_dict['uid'] = user_id
 
         return user_dict, user_ref
+    
+    def create_user(self, uid):
+        # TODO: Do some validation
+        user_doc = {
+            'uid': uid,
+            'name': '',
+            'movies': {}
+        }
+        user_ref = self.db.collection('users').add(user_doc, document_id = str(uid))
+
+        return user_ref, user_doc
+
 
     def create_group(self, group):
         # TODO: Do some validation
@@ -72,4 +85,5 @@ class DatabaseController:
             json.dump(movies, f)
 
         print('Exported FireBase movies to movies.json')
+
 

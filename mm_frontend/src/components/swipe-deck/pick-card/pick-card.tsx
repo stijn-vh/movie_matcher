@@ -4,6 +4,7 @@ import styles from './pick-card.module.scss';
 // import iconThumbDownFilled from '@/assets/icons/thumb-down.svg';
 import { clamp } from '../../../utils/math';
 import PickCardResult from '../pick-card-result';
+import { getAuth } from 'firebase/auth';
 
 interface InteractionStart {
   x: number;
@@ -21,7 +22,7 @@ interface Card {
 
 interface Props {
   cardList: Card[];
-  uid: String;
+  user: any;
   onEvaluate?: (card: Card, status: EvaluateStatus) => void;
 }
 
@@ -40,26 +41,39 @@ const getPosition = (
   }
 };
 
-function PickCard({ cardList = [], uid, onEvaluate }: Props) {
+function PickCard({ cardList = [], user, onEvaluate }: Props) {
   const interactionRef = useRef<InteractionStart>();
   const [isInteracting, setIsInteracting] = useState(false);
   const [activeIndex, setActiveIndex] = useState(cardList.length - 1);
+  const [isInitialized, setIsInitialized] = useState(false);
+
 
   // animation progress(-1 ~ 1)
   const [progress, setProgress] = useState(0);
 
   const handleSwipeEvent = useCallback(async (card: Card, status: EvaluateStatus) => {
     const s = status === 'good' ? 1 : 0;
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      return;
+    }
+
+    const token = await currentUser.getIdToken();
     try {
-      await fetch('http://localhost:5000/users/' + uid + '/rate', {
+      await fetch('http://localhost:5000/groups/' + user.active_group + '/rate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: uid, movie: card.ID, opinion: s }),
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${token}`,
+         },
+        body: JSON.stringify({ movie: card.ID, opinion: s }),
       });
     } catch (error) {
       console.error('Failed to send swipe event:', error);
     }
-  }, [uid]);
+  }, [user]);
 
   /**
    * Start interaction
